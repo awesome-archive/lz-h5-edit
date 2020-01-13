@@ -1,14 +1,13 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import Draggable from 'react-draggable'; // The default
 import {
   Tabs, Button, Row, Col, Card, Menu,
 } from 'antd';
-import { addPageItem, initStore } from '../../../../store/action';
+import {
+  addPageItem, initStore, addPageItemWithSize, addPageItemWithAttrs,
+} from '../../../../store/action';
 import Node from './components/Node';
 import Scene from './components/Scene';
-
-const { TabPane } = Tabs;
 
 const TAB_KEY_NODE = 'TAB_KEY_NODE';
 const TAB_KEY_SCENE = 'TAB_KEY_SCENE';
@@ -24,6 +23,16 @@ class Setting extends React.Component {
   onAddComponent = key => () => {
     const { dispatch } = this.props;
     dispatch(addPageItem(key));
+  }
+
+  onAddComponentWithSize = (key, size) => () => {
+    const { dispatch } = this.props;
+    dispatch(addPageItemWithSize(key, size));
+  }
+
+  onAddComponentWithAttrs = (key, attrs) => () => {
+    const { dispatch } = this.props;
+    dispatch(addPageItemWithAttrs(key, attrs));
   }
 
   onClickTpl = store => () => {
@@ -49,7 +58,12 @@ class Setting extends React.Component {
               </Menu>
             </Col>
             <Col className="right-list">
-              <Comp onAddComponent={this.onAddComponent} onClickTpl={this.onClickTpl} />
+              <Comp
+                onAddComponentWithAttrs={this.onAddComponentWithAttrs}
+                onAddComponentWithSize={this.onAddComponentWithSize}
+                onAddComponent={this.onAddComponent}
+                onClickTpl={this.onClickTpl}
+              />
             </Col>
           </Row>
         </Card>
@@ -58,6 +72,6 @@ class Setting extends React.Component {
   }
 }
 
-const mapStateToProps = () => {};
+const mapStateToProps = () => ({});
 const mapDispatchToProps = dispatch => ({ dispatch });
 export default connect(mapStateToProps, mapDispatchToProps)(Setting);

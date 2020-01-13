@@ -6,13 +6,17 @@ import {
   CHANGE_ITEM_BASE_STYLE, STORE_ADD_PAGE, CHANGE_ACTIVE_PAGE, ADD_PAGE_ITEM, POINT_LEFT_TOP,
   POINT_RIGHT_BOTTOM, POINT_LEFT_BOTTOM, POINT_RIGHT_TOP, REMOVE_ITEM,
   POINT_ROTATE, SAVE_MOVE_START_RECT, PAGE_ITEM_RESORT,
-  CHANGE_ALL_PAGE_BACKGROUND, STORE_RESET_TO_EDIT, STORE_CHANGE_BACK_MUSIC_URL, ADD_ACTIVE_EDIT_KEY, STORE_GROUP_ACTIVE_EDIT_KEYS, ITEM_TYPE_GROUP, CHANGE_ANIMATION, STORE_GROUP_SPLIT, STORE_INIT_TO_EDIT,
+  CHANGE_ALL_PAGE_BACKGROUND, STORE_RESET_TO_EDIT, STORE_CHANGE_BACK_MUSIC_URL, ADD_ACTIVE_EDIT_KEY,
+  STORE_GROUP_ACTIVE_EDIT_KEYS, ITEM_TYPE_GROUP, CHANGE_ANIMATION, STORE_GROUP_SPLIT,
+  STORE_INIT_TO_EDIT, ACTION_COPY_PAGE, ACTION_COPY_ITEM, ITEM_TYPE_SINGLE,
+  ACTION_DELETE_PAGE, ACTION_ADD_PAGE_ITEM_WITH_ATTRS,
+  ACTION_INIT_HISTORY_STORE, ACTION_ADD_PAGE_ITEM_WITH_SIZE, ACTION_CHANGE_ITEM_BORDER, ACTION_CHANGE_ITEM_NAME, ACTION_RESORT_GROUP_ITEM, ACTION_PAGE_MOVE_DOWN, ACTION_PAGE_MOVE_UP,
 } from '../core/constants';
 import {
-  createEditItem, createNode, getAroundRect, createGroup, performGroupRect,
+  createEditItem, createNode, getAroundRect, createGroup, performGroupRect, deepCopy,
 } from '../utils';
 import { createId } from '../utils/IDManage';
-import { getNameWithItemType } from '../utils/Tools';
+import { getComponentDefaultAttrs, getComponentDefaultSize, getComponentDefaultName } from '../core/components';
 
 function startMove(store, action) {
   const { type, value } = action;
@@ -309,7 +313,7 @@ function create(store, action) {
   const { type, value } = action;
   const obj = store.toJS();
   if (type === CREATE_ITEM_STORE) {
-    const { editList, activePage, pages } = obj;
+    const { editList } = obj;
     // { 唯一标识, 组件类型 }
     const { uniqueId, type: componentType } = value;
     editList[uniqueId] = createEditItem(componentType);
@@ -425,8 +429,52 @@ function addPageItem(store, action) {
     const uniqueId = createId();
     const page = pages[activePage];
     // 给组件命名
-    const name = `${getNameWithItemType(value)} ${page.length + 1}`;
+    const name = `${getComponentDefaultName(value)} ${page.length + 1}`;
     editList[uniqueId] = createNode(value, name);
+    Object.assign(editList[uniqueId].attrs, getComponentDefaultAttrs(value));
+    Object.assign(editList[uniqueId].rect, getComponentDefaultSize(value));
+    page.push(uniqueId);
+    // 设置当前添加的元素为激活项
+    obj.activeEditKey = [uniqueId];
+    return fromJS(obj);
+  }
+  return null;
+}
+
+
+function addPageItemWithAttrs(store, action) {
+  const { type, value } = action;
+  const obj = store.toJS();
+  if (type === ACTION_ADD_PAGE_ITEM_WITH_ATTRS) {
+    const { editList, activePage, pages } = obj;
+    // { 唯一标识, 组件类型 }
+    const uniqueId = createId();
+    const page = pages[activePage];
+    // 给组件命名
+    const name = `${getComponentDefaultName(value.type)} ${page.length + 1}`;
+    editList[uniqueId] = createNode(value.type, name);
+    Object.assign(editList[uniqueId].attrs, getComponentDefaultAttrs(value.type), value.attrs);
+    Object.assign(editList[uniqueId].rect, getComponentDefaultSize(value.type));
+    page.push(uniqueId);
+    // 设置当前添加的元素为激活项
+    obj.activeEditKey = [uniqueId];
+    return fromJS(obj);
+  }
+  return null;
+}
+
+function addPageItemWithSize(store, action) {
+  const { type, value } = action;
+  const obj = store.toJS();
+  if (type === ACTION_ADD_PAGE_ITEM_WITH_SIZE) {
+    const { editList, activePage, pages } = obj;
+    // { 唯一标识, 组件类型 }
+    const uniqueId = createId();
+    const page = pages[activePage];
+    // 给组件命名
+    const name = `${getComponentDefaultName(value.type)} ${page.length + 1}`;
+    editList[uniqueId] = createNode(value.type, name);
+    Object.assign(editList[uniqueId].rect, value.size);
     page.push(uniqueId);
     // 设置当前添加的元素为激活项
     obj.activeEditKey = [uniqueId];
@@ -444,6 +492,7 @@ function removeItem(store, action) {
     // { 唯一标识, 组件类型 }
     const page = pages[activePage];
     let delIndex = -1;
+    // 当前只支持单个移除
     if (activeEditKey.length === 1) {
       page.forEach((it, index) => {
         if (activeEditKey.indexOf(it) > -1) delIndex = index;
@@ -503,7 +552,7 @@ function resetStore(store, action) {
         const uniqueId = createId();
         page.push(uniqueId);
         editList[uniqueId] = {
-          name: `${getNameWithItemType(type)}${i}`,
+          name: `${getComponentDefaultName(type)}${i}`,
           ...JSON.parse(JSON.stringify(item)),
         };
       });
@@ -625,6 +674,183 @@ function initStore(store, action) {
   return null;
 }
 
+function initHistoryStore(store, action) {
+  const { type, value } = action;
+  if (type === ACTION_INIT_HISTORY_STORE) {
+    return fromJS(value);
+  }
+  return null;
+}
+
+function copyPage(store, action) {
+  const { type } = action;
+  if (type === ACTION_COPY_PAGE) {
+    const obj = store.toJS();
+    const {
+      groupList, editList, pages, activePage,
+    } = obj;
+    const page = pages[activePage];
+    const result = [];
+    const cloneGroupList = {};
+
+    page.forEach((key) => {
+      const item = editList[key];
+      const itemObj = deepCopy(item);
+      const uniqueId = createId();
+      editList[uniqueId] = itemObj;
+      result.push(uniqueId);
+      const { nodeType } = item;
+      if (nodeType === ITEM_TYPE_GROUP) {
+        cloneGroupList[key] = uniqueId;
+      }
+    });
+
+    Object.keys(cloneGroupList).forEach((key) => {
+      groupList[key].forEach((k) => {
+        const item = editList[k];
+        const itemObj = deepCopy(item);
+        const uniqueId = createId();
+        editList[uniqueId] = itemObj;
+        itemObj.belong = cloneGroupList[key];
+      });
+    });
+
+    obj.activePage = pages.length;
+    obj.activeEditKey = [];
+    pages.push(result);
+    return fromJS(obj);
+  }
+  return null;
+}
+
+function copyItem(store, action) {
+  const { type, value } = action;
+  if (type === ACTION_COPY_ITEM) {
+    const obj = store.toJS();
+    const {
+      groupList, editList, pages, activePage,
+    } = obj;
+    const item = editList[value];
+    const {
+      rect, animate, attrs, nodeType, name, belong,
+    } = item;
+    const uniqueId = createId();
+    const page = pages[activePage];
+    editList[uniqueId] = createNode(item.type, `${name} 拷贝`, belong);
+    // 拷贝属性
+    editList[uniqueId].rect = Object.assign({}, rect);
+    editList[uniqueId].animate = Object.assign({}, animate);
+    editList[uniqueId].attrs = Object.assign({}, attrs);
+
+    if (nodeType === ITEM_TYPE_SINGLE) {
+      if (belong) {
+        // 组内元素，不需要挂载到页面上，只要挂在组节点下
+        groupList[belong].push(uniqueId);
+      } else {
+        page.push(uniqueId);
+      }
+    } else {
+      // 拷贝组元素，需要拷贝各个节点
+    }
+
+    // 设置当前添加的元素为激活项
+    obj.activeEditKey = [uniqueId];
+    return fromJS(obj);
+  }
+  return null;
+}
+
+
+function deletePage(store, action) {
+  const { type } = action;
+  if (type === ACTION_DELETE_PAGE) {
+    const obj = store.toJS();
+    const { pages, activePage } = obj;
+    // 必须保留一个页面
+    if (pages.length > 1) {
+      pages.splice(activePage, 1);
+      if (activePage === pages.length) {
+        obj.activePage = activePage - 1;
+      }
+    }
+    return fromJS(obj);
+  }
+  return null;
+}
+
+function changeItemBorder(store, action) {
+  const { type, value } = action;
+  if (type === ACTION_CHANGE_ITEM_BORDER) {
+    const obj = store.toJS();
+    const { border, key } = value;
+    const { editList } = obj;
+    // 临时方案
+    if (!editList[key].border) editList[key].border = { style: 'solid' };
+    Object.assign(editList[key].border, border);
+    return fromJS(obj);
+  }
+  return null;
+}
+
+function changeItemName(store, action) {
+  const { type, value } = action;
+  if (type === ACTION_CHANGE_ITEM_NAME) {
+    const obj = store.toJS();
+    const { name, key } = value;
+    const { editList } = obj;
+    editList[key].name = name;
+    return fromJS(obj);
+  }
+  return null;
+}
+
+function resortGroupItem(store, action) {
+  const { type, value } = action;
+  if (type === ACTION_RESORT_GROUP_ITEM) {
+    const obj = store.toJS();
+    const { list, key } = value;
+    const { groupList } = obj;
+    groupList[key] = list;
+    return fromJS(obj);
+  }
+  return null;
+}
+
+function movePageToDown(store, action) {
+  const { type } = action;
+  if (type === ACTION_PAGE_MOVE_DOWN) {
+    const obj = store.toJS();
+    const { activePage, pages } = obj;
+    if (activePage + 1 < pages.length) {
+      const before = activePage;
+      const after = activePage + 1;
+      const tmp = pages[after];
+      pages[after] = pages[before];
+      pages[before] = tmp;
+      obj.activePage = activePage + 1;
+    }
+    return fromJS(obj);
+  }
+  return null;
+}
+
+function movePageToUp(store, action) {
+  const { type } = action;
+  if (type === ACTION_PAGE_MOVE_UP) {
+    const obj = store.toJS();
+    const { activePage, pages } = obj;
+    if (activePage - 1 > 0) {
+      const before = activePage;
+      const after = activePage - 1;
+      const tmp = pages[after];
+      pages[after] = pages[before];
+      pages[before] = tmp;
+      obj.activePage = activePage - 1;
+    }
+    return fromJS(obj);
+  }
+  return null;
+}
 
 export default [
   startMove,
@@ -650,4 +876,15 @@ export default [
   changeAnimation,
   splitGroupActiveEditKeys,
   initStore,
+  copyPage,
+  copyItem,
+  deletePage,
+  addPageItemWithAttrs,
+  initHistoryStore,
+  addPageItemWithSize,
+  changeItemBorder,
+  changeItemName,
+  resortGroupItem,
+  movePageToDown,
+  movePageToUp,
 ];

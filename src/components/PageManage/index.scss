@@ -40,10 +40,21 @@
                 white-space: nowrap;
                 text-overflow: ellipsis;
                 overflow: hidden;
+
+                .delete {
+                    margin-left: 12px;
+                    color: #f31b1b;
+                }
             }
         }
     }
     .tabs-content {
         padding: 0 16px;
+    }
+}
+
+.popover-comp-pagemanage-move {
+    .ant-popover-title {
+        display: none;
     }
 }

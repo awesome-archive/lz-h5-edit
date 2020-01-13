@@ -1,17 +1,17 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import Draggable from 'react-draggable'; // The default
-import { Tabs, Button } from 'antd';
+import { Tabs, Button, Collapse } from 'antd';
 
-import TextStyle from '../Text/style';
-import PictureStyle from '../Picture/style';
 import GroupItemStyle from '../GroupItem/style';
 
 import './index.scss';
-import { COMPONENT_TYPE_TEXT, COMPONENT_TYPE_PICTURE } from '../../core/constants';
-import { changeBaseStyle, removeItem } from '../../store/action';
+import { changeBaseStyle, removeItem, changeItemBorder } from '../../store/action';
 import Animate from './components/animate';
 import { getComponentStyleMap } from '../../core/components';
+import Attribute from './components/attribute';
+import SettingPosition from '../SettingPosition';
+import SettingBorder from './components/border';
 
 const { TabPane } = Tabs;
 
@@ -28,17 +28,37 @@ class Setting extends React.Component {
     dispatch(removeItem());
   }
 
+  setBaseStyle = key => (e) => {
+    const { dispatch, activeEditKey } = this.props;
+    const { target } = e;
+    let value = e;
+    if (target) {
+      value = +target.value;
+    }
+    dispatch(changeBaseStyle({ [key]: value }, activeEditKey));
+  }
+
+  setBorder = key => (e) => {
+    const { dispatch, activeEditKey } = this.props;
+    const { target } = e;
+    let value = e;
+    if (target) {
+      value = +target.value;
+    }
+    dispatch(changeItemBorder(activeEditKey, { [key]: value }));
+  }
+
   renderComponent() {
     const { componentType } = this.props;
-    const StyleComp = getComponentStyleMap(componentType);
-    if (StyleComp) {
-      return <StyleComp />;
+    const styleConfig = getComponentStyleMap(componentType);
+    if (styleConfig) {
+      return <Attribute styleConfig={styleConfig} />;
     }
-    return <GroupItemStyle />;
+    return null;
   }
 
   render() {
-    const { activeEditKey } = this.props;
+    const { activeEditKey, item } = this.props;
     return (
       activeEditKey && activeEditKey.length > 0
       && (
@@ -60,6 +80,18 @@ class Setting extends React.Component {
               {
                   this.renderComponent()
               }
+              <Collapse>
+                <Collapse.Panel header="边框" key="1">
+                  {
+                    item && <SettingBorder {...item} setBorder={this.setBorder} />
+                  }
+                </Collapse.Panel>
+                <Collapse.Panel header="位置与尺寸" key="3">
+                  {
+                    item && <SettingPosition {...item} setBaseStyle={this.setBaseStyle} />
+                  }
+                </Collapse.Panel>
+              </Collapse>
               <div className="text-center m-t-12 m-b-12">
                 <Button onClick={this.onRemove} type="danger">删除元素</Button>
               </div>
@@ -86,7 +118,7 @@ const mapStateToProps = (store) => {
   const result = { activeEditKey };
   if (activeEditKey && activeEditKey.length === 1) {
     const item = editList[activeEditKey[0]];
-    if (item) return Object.assign(result, { componentType: item.type });
+    if (item) return Object.assign(result, { componentType: item.type, item });
   }
   return result;
 };

@@ -4,13 +4,9 @@ import Phone from './phone';
 
 // 引入样式文件
 import './index.scss';
-import { resetComponentSize, getComponetData } from './config';
+import { getComponetData } from './config';
 import { getDetail } from '../../services/create';
-import { translateShowDataFromStore } from '../../utils';
-
-const refNames = {
-  content: 'content',
-};
+import { translateShowDataFromStore, addShortFonts } from '../../utils';
 
 class Perview extends React.Component {
   constructor(props) {
@@ -23,12 +19,20 @@ class Perview extends React.Component {
       data,
       id: obj.id,
     };
+    if (window.opusData) {
+      this.state = {
+        data: window.opusData,
+        id: 0,
+      };
+    }
   }
 
   componentDidMount() {
     const { id } = this.state;
     if (+id > 0) {
-      getDetail({ id }).then((res) => {
+      addShortFonts(id);
+      getDetail({ id }).then((resp) => {
+        const { content: res } = resp;
         const data = translateShowDataFromStore(JSON.parse(res));
         this.setState({ data });
       });

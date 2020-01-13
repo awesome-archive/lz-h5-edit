@@ -74,6 +74,28 @@ export const STORE_GROUP_ACTIVE_EDIT_KEYS = 'STORE_GROUP_ACTIVE_EDIT_KEYS';
 export const STORE_GROUP_SPLIT = 'STORE_GROUP_SPLIT';
 // 修改动画属性
 export const CHANGE_ANIMATION = 'CHANGE_ANIMATION';
+// 拷贝页面
+export const ACTION_COPY_PAGE = 'ACTION_COPY_PAGE';
+// 拷贝单个元素
+export const ACTION_COPY_ITEM = 'ACTION_COPY_ITEM';
+// 删除单个页面
+export const ACTION_DELETE_PAGE = 'ACTION_DELETE_PAGE';
+// 新增元素，附带私有属性
+export const ACTION_ADD_PAGE_ITEM_WITH_ATTRS = 'ACTION_ADD_PAGE_ITEM_WITH_ATTRS';
+// 新增元素，附带尺寸
+export const ACTION_ADD_PAGE_ITEM_WITH_SIZE = 'ACTION_ADD_PAGE_ITEM_WITH_SIZE';
+// 初始化store，在撤销重做里使用
+export const ACTION_INIT_HISTORY_STORE = 'ACTION_INIT_HISTORY_STORE';
+// 修改元素边框尺寸
+export const ACTION_CHANGE_ITEM_BORDER = 'ACTION_CHANGE_ITEM_BORDER';
+// 修改元素名称
+export const ACTION_CHANGE_ITEM_NAME = 'ACTION_CHANGE_ITEM_NAME';
+// 重排组内元素次序
+export const ACTION_RESORT_GROUP_ITEM = 'ACTION_RESORT_GROUP_ITEM';
+// 将当前页面上移
+export const ACTION_PAGE_MOVE_UP = 'ACTION_PAGE_MOVE_UP';
+// 将当前页面下移
+export const ACTION_PAGE_MOVE_DOWN = 'ACTION_PAGE_MOVE_DOWN';
 
 // 组件类型
 // 文本
@@ -86,6 +108,16 @@ export const COMPONENT_TYPE_QQ_VIDEO = 'COMPONENT_TYPE_QQ_VIDEO';
 export const COMPONENT_TYPE_BUTTON = 'COMPONENT_TYPE_BUTTON';
 // 输入框
 export const COMPONENT_TYPE_INPUT = 'COMPONENT_TYPE_INPUT';
+// 艺术字
+export const COMPONENT_TYPE_ART_INPUT = 'COMPONENT_TYPE_ART_INPUT';
+// 地图
+export const COMPONENT_TYPE_MAP = 'COMPONENT_TYPE_MAP';
+// 形状
+export const COMPONENT_TYPE_SHAPE = 'COMPONENT_TYPE_SHAPE';
+// 视频
+export const COMPONENT_TYPE_VIDEO = 'COMPONENT_TYPE_VIDEO';
+// 文字打字机
+export const COMPONENT_TYPE_TEXT_TYPED = 'COMPONENT_TYPE_TEXT_TYPED';
 
 /* 节点类型 */
 // 单一节点
@@ -121,5 +153,35 @@ export const EXAMPLE_DATA_DRAGON_FESTIVAL = 'dragon';
 export const EXAMPLE_DATA_1024 = 'IT1024';
 // 双十一展示
 export const EXAMPLE_DATA_DOUBLE_ELEVEN = 'double11';
+// 双十二展示
+export const EXAMPLE_DATA_DOUBLE_TWENTY = 'double12';
+// 感恩节展示
+export const EXAMPLE_DATA_THINKSGIVING = 'thinksgiving';
 // 使用缓存数据标识
 export const EXAMPLE_DATA_PREVIEW = 'cache';
+
+
+/* 样式渲染组件表示 */
+// 颜色
+export const STYLE_RENDER_TYPE_COLOR = 'STYLE_RENDER_TYPE_COLOR';
+// 选择框
+export const STYLE_RENDER_TYPE_SELECT = 'STYLE_RENDER_TYPE_SELECT';
+// 输入框
+export const STYLE_RENDER_TYPE_INPUT = 'STYLE_RENDER_TYPE_INPUT';
+// 多行输入框
+export const STYLE_RENDER_TYPE_TEXTAREA = 'STYLE_RENDER_TYPE_TEXTAREA';
+// 带滑动条的输入框
+export const STYLE_RENDER_TYPE_SLIDER_INPUT = 'STYLE_RENDER_TYPE_SLIDER_INPUT';
+// 自定义
+export const STYLE_RENDER_TYPE_CUSTOM = 'STYLE_RENDER_TYPE_CUSTOM';
+// 不需要显示
+export const STYLE_RENDER_TYPE_HIDDEN = 'STYLE_RENDER_TYPE_HIDDEN';
+// 可编辑的div标签
+export const STYLE_RENDER_TYPE_CONTENT_EDIT_DIV = 'STYLE_RENDER_TYPE_CONTENT_EDIT_DIV';
+
+/* 属性值类型 */
+// 数字型
+export const STYLE_VALUE_TYPE_NUMBER = 'STYLE_VALUE_TYPE_NUMBER';
+
+// 多个属性值设置使用key
+export const STYLE_KEY_TYPE_ALL = 'STYLE_KEY_TYPE_ALL';

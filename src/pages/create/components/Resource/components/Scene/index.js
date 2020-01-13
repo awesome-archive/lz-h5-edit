@@ -1,14 +1,14 @@
 import React from 'react';
 import { Button } from 'antd';
 import { getComponentRenderMap } from '../../../../../../core/components';
-import { getLocalCardList } from './config';
 import { winSize } from '../../../../../../utils';
+import { getLocalTplDatas } from '../../../../../../core/config';
 
 class RealPreview extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      list: getLocalCardList(),
+      list: getLocalTplDatas(),
     };
   }
 
@@ -16,7 +16,6 @@ class RealPreview extends React.Component {
     const { onClickTpl } = this.props;
     const { content, id, origin } = data;
     const { height } = winSize;
-    console.log(data, this);
     const { list, backGroundImage } = content;
     const style = {
       backgroundImage: `url(${backGroundImage})`,
@@ -29,8 +28,8 @@ class RealPreview extends React.Component {
     const item = list[0];
 
     return (
-      <div className="scene-content" style={style}>
-        <div key={id} style={{ position: 'relative' }}>
+      <div key={id} className="scene-content" style={style}>
+        <div style={{ position: 'relative' }}>
           {
             item.map((it, idx) => {
               const { type, ...others } = it;

@@ -1,8 +1,11 @@
 import React from 'react';
 import QRCode from 'qrcode';
 import { Row, Col, Icon } from 'antd';
-import { CLICK_TYPE_DEFAULT, CLICK_TYPE_EDIT, CLICK_TYPE_PREVIEW } from '../../config';
+import {
+  CLICK_TYPE_DEFAULT, CLICK_TYPE_EDIT, CLICK_TYPE_PREVIEW, CLICK_TYPE_DOWNLOAD,
+} from '../../config';
 import Perview from '../Perview';
+import { getDomain } from '../../../../services/apiConfig';
 
 export default (props) => {
   const { data, defaultType, onClick } = props;
@@ -17,7 +20,7 @@ export default (props) => {
   }
   const [qcorde, setCorde] = React.useState('');
   React.useEffect(() => {
-    QRCode.toDataURL(`http://show.lzuntalented.cn/wap.html?id=${id}`)
+    QRCode.toDataURL(`${getDomain()}/wap.html?id=${id}`)
       .then((url) => {
         setCorde(url);
       });
@@ -36,6 +39,9 @@ export default (props) => {
         </Col>
         <Col onClick={onClick}>
           <span className="hove-span" onClick={onClick(CLICK_TYPE_PREVIEW, id)}><Icon type="eye" />预览</span>
+        </Col>
+        <Col>
+          <span className="hove-span" onClick={onClick(CLICK_TYPE_DOWNLOAD, id)}><Icon type="download" />下载</span>
         </Col>
       </Row>
     </li>
